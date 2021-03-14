@@ -3,6 +3,7 @@ pragma experimental ABIEncoderV2;
 import 'lib/SafeMath.sol';
 import 'UserRecord.sol';
 contract TrasnsferHelper is UserRecord{
+    using SafeMath for uint256;
     function TransferFunc(
         address payable[] memory senders, 
         address payable[] memory receivers, 
@@ -16,26 +17,27 @@ contract TrasnsferHelper is UserRecord{
         "The first claimer address is not valid right now!");
         require(information[msg.sender].amount == amount,
         "The amount to be transferred does not match");
+        require(information[msg.sender].isTxDone == false,
+        "The transfer is already done!");
         bool memberCheck = false;
         for(uint256 i = 0; i < NoOfClaimers; i++) {  
             memberCheck = false;       
             for(uint256 j = 0; j < information[msg.sender].noOfClaimers; j++) {         
                 if(senders[i] == information[msg.sender].claimers[j].addr){
+                    //balance verification
+                    require(information[msg.sender].claimers[j].balance >= amount,"someone balance is not enough");
+                    information[msg.sender].claimers[j].balance = information[msg.sender].claimers[j].balance.sub(amount);
                     memberCheck = true;
                 }
             }
+            //Should not fail
             require(memberCheck == true, "Adversary detected! Some sender does not register!"); 
         }
-        require(information[msg.sender].isTxDone == false,
-        "The transfer is already done!");
         information[msg.sender].isTxDone=true;
         //TODO: signiture verification
-        //TODO: balance verification
         for(uint256 i = 0; i < NoOfClaimers; i++) {         
             receivers[i].transfer(amount);
-            if(senders[i] != msg.sender){
-                senders[i].transfer(amt_to_firstClaimer);
-            }
         }
+        senders[0].transfer(amt_to_firstClaimer.mul(NoOfClaimers));
     }
 }

@@ -17,6 +17,7 @@ contract UserRecord{
         bool isIPv4;
         uint256[4] IP_addr;
         bool valid;
+        uint256 balance;
     }
     struct UserGroup{
         Hoster hoster;
@@ -28,7 +29,6 @@ contract UserRecord{
     }
     mapping(address => UserGroup) public information;
     function initRegister(
-        uint256 amount,
         uint256 register_deadline,
         uint256 hoster_start_timestamp,
         uint256 hoster_end_timestamp,
@@ -37,12 +37,12 @@ contract UserRecord{
         uint256 pubkey,
         bool claimer_isIPv4,
         uint256[4] memory claimer_IP_addr
-    ) public {
+    ) public payable {
         require(information[msg.sender].hoster.hoster_end_timestamp < block.timestamp, 
         "One user must host only one transfer shuffling service until expiration.");
         require(register_deadline < hoster_start_timestamp, 
         "The register deadline must be ahead of hoster server staring timestamp");
-        information[msg.sender].amount=amount;
+        information[msg.sender].amount=msg.value;
         information[msg.sender].register_deadline=register_deadline;
         information[msg.sender].isTxDone=false;
         information[msg.sender].hoster.hoster_start_timestamp=hoster_start_timestamp;
@@ -56,19 +56,19 @@ contract UserRecord{
         information[msg.sender].claimers[noOfClaimers-1].isIPv4 = claimer_isIPv4;
         information[msg.sender].claimers[noOfClaimers-1].IP_addr = claimer_IP_addr;
         information[msg.sender].claimers[noOfClaimers-1].valid = true;
+        information[msg.sender].claimers[noOfClaimers-1].balance = msg.value;
     }
     function followRegister(
-        address firstClaimer, 
-        uint256 amount, 
+        address firstClaimer,
         uint256 pubkey,         
         bool isIPv4,
         uint256[4] memory IP_addr
-    ) public {
+    ) public payable {
         require(information[firstClaimer].hoster.hoster_end_timestamp > block.timestamp, 
         "The first claimer address is not valid right now!");
         require(information[firstClaimer].register_deadline > block.timestamp,
         "Register deadline has passed right now!");
-        require(information[firstClaimer].amount == amount,
+        require(information[firstClaimer].amount == msg.value,
         "The amount to be transferred does not match");
         require(information[firstClaimer].isTxDone == false,
         "The transfer is already done. Please look up other hosters");
@@ -83,6 +83,17 @@ contract UserRecord{
         information[firstClaimer].claimers[noOfClaimers-1].isIPv4 = isIPv4;
         information[firstClaimer].claimers[noOfClaimers-1].IP_addr = IP_addr;
         information[firstClaimer].claimers[noOfClaimers-1].valid = true;
+        information[firstClaimer].claimers[noOfClaimers-1].balance = msg.value;
+    }
+    function withdraw(
+        address firstClaimer,
+        uint256 i,
+        uint256 amount
+    )public payable{
+        require(information[firstClaimer].claimers[i].addr == msg.sender, "someone balance is not enough");
+        require(information[firstClaimer].claimers[i].balance >= amount,"balance is not enough");
+        information[firstClaimer].claimers[i].balance = information[firstClaimer].claimers[i].balance.sub(amount);
+        msg.sender.transfer(amount);
     }
     // function lookUpNoOfClaimers(address firstClaimer) public view returns (uint256){
     //     require(information[msg.sender].hoster.hoster_end_timestamp > block.timestamp, 
