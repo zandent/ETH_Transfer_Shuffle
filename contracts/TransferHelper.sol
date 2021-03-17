@@ -54,7 +54,7 @@ contract TrasnsferHelper is UserRecord{
         message = abi.encodePacked(message, amount);
         message = abi.encodePacked(message, total_amount_to_firstClaimer);
         //s2: hash the message
-        bytes32 hashmsg = sha256(message);
+        bytes32 hashmsg = keccak256(message);
         //s3: check generated address matches or not.
         for(uint256 i = 0; i < NoOfClaimers; i++) {         
             require(hashmsg.recover(v[i],r[i],s[i]) == senders[i], "signiture is invalid!");
