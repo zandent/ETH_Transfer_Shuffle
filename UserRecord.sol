@@ -9,13 +9,13 @@ contract UserRecord{
         uint256 hoster_start_timestamp;
         uint256 hoster_end_timestamp;
         bool isIPv4;
-        uint256[4] IP_addr;
+        uint32 IP_addr;
     }
     struct Claimer{
         address addr;
         uint256 pubkey;
         bool isIPv4;
-        uint256[4] IP_addr;
+        uint32 IP_addr;
         bool valid;
         uint256 balance;
     }
@@ -29,14 +29,15 @@ contract UserRecord{
     }
     mapping(address => UserGroup) public information;
     function initRegister(
-        uint256 register_deadline,
-        uint256 hoster_start_timestamp,
-        uint256 hoster_end_timestamp,
+        uint128 register_deadline,
+        uint128 hoster_start_timestamp,
+        uint128 hoster_end_timestamp,
         bool hoster_isIPv4,
-        uint256[4] memory hoster_IP_addr,
-        uint256 pubkey,
+        uint32 hoster_IP_addr,
+        uint128 lo_pubkey,
+        uint128 hi_pubkey,
         bool claimer_isIPv4,
-        uint256[4] memory claimer_IP_addr
+        uint32 claimer_IP_addr
     ) public payable {
         require(information[msg.sender].hoster.hoster_end_timestamp < block.timestamp, 
         "One user must host only one transfer shuffling service until expiration.");
@@ -52,17 +53,19 @@ contract UserRecord{
         information[msg.sender].noOfClaimers = 1;
         uint256 noOfClaimers = information[msg.sender].noOfClaimers;
         information[msg.sender].claimers[noOfClaimers-1].addr = msg.sender;
-        information[msg.sender].claimers[noOfClaimers-1].pubkey = pubkey;
+        information[msg.sender].claimers[noOfClaimers-1].pubkey = hi_pubkey << 128 | lo_pubkey;
         information[msg.sender].claimers[noOfClaimers-1].isIPv4 = claimer_isIPv4;
         information[msg.sender].claimers[noOfClaimers-1].IP_addr = claimer_IP_addr;
         information[msg.sender].claimers[noOfClaimers-1].valid = true;
         information[msg.sender].claimers[noOfClaimers-1].balance = msg.value;
     }
+
     function followRegister(
         address firstClaimer,
-        uint256 pubkey,         
+        uint128 lo_pubkey,
+        uint128 hi_pubkey,        
         bool isIPv4,
-        uint256[4] memory IP_addr
+        uint32 IP_addr
     ) public payable {
         require(information[firstClaimer].hoster.hoster_end_timestamp > block.timestamp, 
         "The first claimer address is not valid right now!");
@@ -79,7 +82,7 @@ contract UserRecord{
         information[firstClaimer].noOfClaimers = information[firstClaimer].noOfClaimers.add(1);
         uint256 noOfClaimers = information[firstClaimer].noOfClaimers;
         information[firstClaimer].claimers[noOfClaimers-1].addr = msg.sender;
-        information[firstClaimer].claimers[noOfClaimers-1].pubkey = pubkey;
+        information[firstClaimer].claimers[noOfClaimers-1].pubkey = hi_pubkey << 128 | lo_pubkey;
         information[firstClaimer].claimers[noOfClaimers-1].isIPv4 = isIPv4;
         information[firstClaimer].claimers[noOfClaimers-1].IP_addr = IP_addr;
         information[firstClaimer].claimers[noOfClaimers-1].valid = true;
