@@ -11,13 +11,13 @@ contract TrasnsferHelper is UserRecord{
         address payable[] memory receivers, 
         //no need for pubkeys, address is enough
         //uint256[] memory sender_pubKeys, 
-        uint256 NoOfClaimers,
+        uint128 NoOfClaimers,
         uint256 amount,
         uint256 total_amount_to_firstClaimer,
         //signiture components
         uint8[] memory v,
-        bytes32[] memory r,
-        bytes32[] memory s
+        uint256[] memory r,
+        uint256[] memory s
     ) public payable{
         require(information[msg.sender].hoster.hoster_end_timestamp > block.timestamp, 
         "The first claimer address is not valid right now!");
@@ -44,10 +44,10 @@ contract TrasnsferHelper is UserRecord{
         //TODO: signiture verification
         //s1: packed data to message as a form of byte array.
         bytes memory message = abi.encodePacked(senders[0]);
-        for(uint256 i = 1; i < NoOfClaimers; i++) {         
+        for(uint128 i = 1; i < NoOfClaimers; i++) {         
             message = abi.encodePacked(message, senders[i]);
         }
-        for(uint256 i = 0; i < NoOfClaimers; i++) {         
+        for(uint128 i = 0; i < NoOfClaimers; i++) {         
             message = abi.encodePacked(message, receivers[i]);
         }
         message = abi.encodePacked(message, NoOfClaimers);
@@ -56,11 +56,11 @@ contract TrasnsferHelper is UserRecord{
         //s2: hash the message
         bytes32 hashmsg = keccak256(message);
         //s3: check generated address matches or not.
-        for(uint256 i = 0; i < NoOfClaimers; i++) {         
-            require(hashmsg.recover(v[i],r[i],s[i]) == senders[i], "signiture is invalid!");
+        for(uint128 i = 0; i < NoOfClaimers; i++) {         
+            require(hashmsg.recover(v[i],bytes32(r[i]),bytes32(s[i])) == senders[i], "signiture is invalid!");
         }
 
-        for(uint256 i = 0; i < NoOfClaimers; i++) {         
+        for(uint128 i = 0; i < NoOfClaimers; i++) {         
             receivers[i].transfer(amount);
         }
         senders[0].transfer(total_amount_to_firstClaimer);

@@ -82,7 +82,7 @@ contract UserRecord{
         information[firstClaimer].noOfClaimers = information[firstClaimer].noOfClaimers.add(1);
         uint256 noOfClaimers = information[firstClaimer].noOfClaimers;
         information[firstClaimer].claimers[noOfClaimers-1].addr = msg.sender;
-        information[firstClaimer].claimers[noOfClaimers-1].pubkey = hi_pubkey << 128 | lo_pubkey;
+        information[firstClaimer].claimers[noOfClaimers-1].pubkey = (uint256(hi_pubkey)) << 128 | uint256(lo_pubkey);
         information[firstClaimer].claimers[noOfClaimers-1].isIPv4 = isIPv4;
         information[firstClaimer].claimers[noOfClaimers-1].IP_addr = IP_addr;
         information[firstClaimer].claimers[noOfClaimers-1].valid = true;
@@ -90,17 +90,23 @@ contract UserRecord{
     }
     function withdraw(
         address firstClaimer,
-        uint256 i,
-        uint256 amount
+        uint128 i,
+        uint128 lo_amount,
+        uint128 hi_amount
     )public payable{
         require(information[firstClaimer].claimers[i].addr == msg.sender, "someone balance is not enough");
-        require(information[firstClaimer].claimers[i].balance >= amount,"balance is not enough");
-        information[firstClaimer].claimers[i].balance = information[firstClaimer].claimers[i].balance.sub(amount);
-        msg.sender.transfer(amount);
+        require(information[firstClaimer].claimers[i].balance >= ((uint256(hi_amount)) << 128 | uint256(lo_amount)),"balance is not enough");
+        information[firstClaimer].claimers[i].balance = information[firstClaimer].claimers[i].balance.sub(((uint256(hi_amount)) << 128 | uint256(lo_amount)));
+        msg.sender.transfer(((uint256(hi_amount)) << 128 | uint256(lo_amount)));
     }
-    // function lookUpNoOfClaimers(address firstClaimer) public view returns (uint256){
-    //     require(information[msg.sender].hoster.hoster_end_timestamp > block.timestamp, 
-    //     "The first claimer address is not valid right now!");
-    //     return information[msg.sender].noOfClaimers;
-    // }
+    function lookUpNoOfClaimers(address firstClaimer) public view returns (uint256){
+        require(information[firstClaimer].hoster.hoster_end_timestamp > block.timestamp, 
+        "The first claimer address is not valid right now!");
+        return information[firstClaimer].noOfClaimers;
+    }
+    function lookUpBalance(address firstClaimer, uint128 i) public view returns (uint256){
+        require(information[firstClaimer].hoster.hoster_end_timestamp > block.timestamp, 
+        "The first claimer address is not valid right now!");
+        return information[firstClaimer].claimers[i].balance;
+    }
 }
