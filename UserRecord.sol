@@ -34,8 +34,7 @@ contract UserRecord{
         uint128 hoster_end_timestamp,
         bool hoster_isIPv4,
         uint32 hoster_IP_addr,
-        uint128 lo_pubkey,
-        uint128 hi_pubkey,
+        uint256 pubkey,
         bool claimer_isIPv4,
         uint32 claimer_IP_addr
     ) public payable {
@@ -53,7 +52,7 @@ contract UserRecord{
         information[msg.sender].noOfClaimers = 1;
         uint256 noOfClaimers = information[msg.sender].noOfClaimers;
         information[msg.sender].claimers[noOfClaimers-1].addr = msg.sender;
-        information[msg.sender].claimers[noOfClaimers-1].pubkey = hi_pubkey << 128 | lo_pubkey;
+        information[msg.sender].claimers[noOfClaimers-1].pubkey = pubkey;
         information[msg.sender].claimers[noOfClaimers-1].isIPv4 = claimer_isIPv4;
         information[msg.sender].claimers[noOfClaimers-1].IP_addr = claimer_IP_addr;
         information[msg.sender].claimers[noOfClaimers-1].valid = true;
@@ -62,8 +61,7 @@ contract UserRecord{
 
     function followRegister(
         address firstClaimer,
-        uint128 lo_pubkey,
-        uint128 hi_pubkey,        
+        uint256 pubkey,        
         bool isIPv4,
         uint32 IP_addr
     ) public payable {
@@ -82,7 +80,7 @@ contract UserRecord{
         information[firstClaimer].noOfClaimers = information[firstClaimer].noOfClaimers.add(1);
         uint256 noOfClaimers = information[firstClaimer].noOfClaimers;
         information[firstClaimer].claimers[noOfClaimers-1].addr = msg.sender;
-        information[firstClaimer].claimers[noOfClaimers-1].pubkey = (uint256(hi_pubkey)) << 128 | uint256(lo_pubkey);
+        information[firstClaimer].claimers[noOfClaimers-1].pubkey = pubkey;
         information[firstClaimer].claimers[noOfClaimers-1].isIPv4 = isIPv4;
         information[firstClaimer].claimers[noOfClaimers-1].IP_addr = IP_addr;
         information[firstClaimer].claimers[noOfClaimers-1].valid = true;
@@ -91,13 +89,12 @@ contract UserRecord{
     function withdraw(
         address firstClaimer,
         uint128 i,
-        uint128 lo_amount,
-        uint128 hi_amount
+        uint256 amount
     )public payable{
         require(information[firstClaimer].claimers[i].addr == msg.sender, "someone balance is not enough");
-        require(information[firstClaimer].claimers[i].balance >= ((uint256(hi_amount)) << 128 | uint256(lo_amount)),"balance is not enough");
-        information[firstClaimer].claimers[i].balance = information[firstClaimer].claimers[i].balance.sub(((uint256(hi_amount)) << 128 | uint256(lo_amount)));
-        msg.sender.transfer(((uint256(hi_amount)) << 128 | uint256(lo_amount)));
+        require(information[firstClaimer].claimers[i].balance >= amount,"balance is not enough");
+        information[firstClaimer].claimers[i].balance = information[firstClaimer].claimers[i].balance.sub(amount);
+        msg.sender.transfer(amount);
     }
     function lookUpNoOfClaimers(address firstClaimer) public view returns (uint256){
         require(information[firstClaimer].hoster.hoster_end_timestamp > block.timestamp, 
