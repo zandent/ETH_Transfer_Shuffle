@@ -13,7 +13,7 @@ contract TrasnsferHelper is UserRecord{
         //uint256[] memory sender_pubKeys, 
         uint128 NoOfClaimers,
         uint256 amount,
-        uint256 total_amount_to_firstClaimer,
+        //uint256 total_amount_to_firstClaimer,
         //signiture components
         uint8[] memory v,
         uint256[] memory r,
@@ -52,7 +52,7 @@ contract TrasnsferHelper is UserRecord{
         }
         message = abi.encodePacked(message, NoOfClaimers);
         message = abi.encodePacked(message, amount);
-        message = abi.encodePacked(message, total_amount_to_firstClaimer);
+        //message = abi.encodePacked(message, total_amount_to_firstClaimer);
         //s2: hash the message
         bytes32 hashmsg = keccak256(message);
         //s3: check generated address matches or not.
@@ -63,6 +63,6 @@ contract TrasnsferHelper is UserRecord{
         for(uint128 i = 0; i < NoOfClaimers; i++) {         
             receivers[i].transfer(amount);
         }
-        senders[0].transfer(total_amount_to_firstClaimer);
+        //senders[0].transfer(total_amount_to_firstClaimer);
     }
 }

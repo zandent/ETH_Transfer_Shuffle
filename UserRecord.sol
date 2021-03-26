@@ -8,13 +8,10 @@ contract UserRecord{
     struct Hoster{
         uint256 hoster_start_timestamp;
         uint256 hoster_end_timestamp;
-        bool isIPv4;
         uint32 IP_addr;
     }
     struct Claimer{
         address addr;
-        uint256 pubkey;
-        bool isIPv4;
         uint32 IP_addr;
         bool valid;
         uint256 balance;
@@ -32,10 +29,7 @@ contract UserRecord{
         uint128 register_deadline,
         uint128 hoster_start_timestamp,
         uint128 hoster_end_timestamp,
-        bool hoster_isIPv4,
         uint32 hoster_IP_addr,
-        uint256 pubkey,
-        bool claimer_isIPv4,
         uint32 claimer_IP_addr
     ) public payable {
         require(information[msg.sender].hoster.hoster_end_timestamp < block.timestamp, 
@@ -47,13 +41,10 @@ contract UserRecord{
         information[msg.sender].isTxDone=false;
         information[msg.sender].hoster.hoster_start_timestamp=hoster_start_timestamp;
         information[msg.sender].hoster.hoster_end_timestamp=hoster_end_timestamp;
-        information[msg.sender].hoster.isIPv4=hoster_isIPv4;
         information[msg.sender].hoster.IP_addr=hoster_IP_addr;
         information[msg.sender].noOfClaimers = 1;
         uint256 noOfClaimers = information[msg.sender].noOfClaimers;
         information[msg.sender].claimers[noOfClaimers-1].addr = msg.sender;
-        information[msg.sender].claimers[noOfClaimers-1].pubkey = pubkey;
-        information[msg.sender].claimers[noOfClaimers-1].isIPv4 = claimer_isIPv4;
         information[msg.sender].claimers[noOfClaimers-1].IP_addr = claimer_IP_addr;
         information[msg.sender].claimers[noOfClaimers-1].valid = true;
         information[msg.sender].claimers[noOfClaimers-1].balance = msg.value;
@@ -61,8 +52,6 @@ contract UserRecord{
 
     function followRegister(
         address firstClaimer,
-        uint256 pubkey,        
-        bool isIPv4,
         uint32 IP_addr
     ) public payable {
         require(information[firstClaimer].hoster.hoster_end_timestamp > block.timestamp, 
@@ -80,8 +69,6 @@ contract UserRecord{
         information[firstClaimer].noOfClaimers = information[firstClaimer].noOfClaimers.add(1);
         uint256 noOfClaimers = information[firstClaimer].noOfClaimers;
         information[firstClaimer].claimers[noOfClaimers-1].addr = msg.sender;
-        information[firstClaimer].claimers[noOfClaimers-1].pubkey = pubkey;
-        information[firstClaimer].claimers[noOfClaimers-1].isIPv4 = isIPv4;
         information[firstClaimer].claimers[noOfClaimers-1].IP_addr = IP_addr;
         information[firstClaimer].claimers[noOfClaimers-1].valid = true;
         information[firstClaimer].claimers[noOfClaimers-1].balance = msg.value;
