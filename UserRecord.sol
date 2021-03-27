@@ -9,10 +9,10 @@ contract UserRecord{
         uint256 hoster_start_timestamp;
         uint256 hoster_end_timestamp;
         uint32 IP_addr;
+        uint16 port;
     }
     struct Claimer{
         address addr;
-        uint32 IP_addr;
         bool valid;
         uint256 balance;
     }
@@ -30,7 +30,7 @@ contract UserRecord{
         uint128 hoster_start_timestamp,
         uint128 hoster_end_timestamp,
         uint32 hoster_IP_addr,
-        uint32 claimer_IP_addr
+        uint16 port
     ) public payable {
         require(information[msg.sender].hoster.hoster_end_timestamp < block.timestamp, 
         "One user must host only one transfer shuffling service until expiration.");
@@ -42,17 +42,16 @@ contract UserRecord{
         information[msg.sender].hoster.hoster_start_timestamp=hoster_start_timestamp;
         information[msg.sender].hoster.hoster_end_timestamp=hoster_end_timestamp;
         information[msg.sender].hoster.IP_addr=hoster_IP_addr;
+        information[msg.sender].hoster.port=port;
         information[msg.sender].noOfClaimers = 1;
         uint256 noOfClaimers = information[msg.sender].noOfClaimers;
         information[msg.sender].claimers[noOfClaimers-1].addr = msg.sender;
-        information[msg.sender].claimers[noOfClaimers-1].IP_addr = claimer_IP_addr;
         information[msg.sender].claimers[noOfClaimers-1].valid = true;
         information[msg.sender].claimers[noOfClaimers-1].balance = msg.value;
     }
 
     function followRegister(
-        address firstClaimer,
-        uint32 IP_addr
+        address firstClaimer
     ) public payable {
         require(information[firstClaimer].hoster.hoster_end_timestamp > block.timestamp, 
         "The first claimer address is not valid right now!");
@@ -69,8 +68,6 @@ contract UserRecord{
         information[firstClaimer].noOfClaimers = information[firstClaimer].noOfClaimers.add(1);
         uint256 noOfClaimers = information[firstClaimer].noOfClaimers;
         information[firstClaimer].claimers[noOfClaimers-1].addr = msg.sender;
-        information[firstClaimer].claimers[noOfClaimers-1].IP_addr = IP_addr;
-        information[firstClaimer].claimers[noOfClaimers-1].valid = true;
         information[firstClaimer].claimers[noOfClaimers-1].balance = msg.value;
     }
     function withdraw(
