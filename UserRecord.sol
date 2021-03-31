@@ -15,6 +15,7 @@ contract UserRecord{
         address addr;
         bool valid;
         uint256 balance;
+        uint256 ek;
     }
     struct UserGroup{
         Hoster hoster;
@@ -75,10 +76,18 @@ contract UserRecord{
         uint128 i,
         uint256 amount
     )public payable{
-        require(information[firstClaimer].claimers[i].addr == msg.sender, "someone balance is not enough");
+        require(information[firstClaimer].claimers[i].addr == msg.sender, "Index is wrong");
         require(information[firstClaimer].claimers[i].balance >= amount,"balance is not enough");
         information[firstClaimer].claimers[i].balance = information[firstClaimer].claimers[i].balance.sub(amount);
         msg.sender.transfer(amount);
+    }
+    function updateEk(
+        address firstClaimer,
+        uint128 i,
+        uint256 ek
+    )public {
+        require(information[firstClaimer].claimers[i].addr == msg.sender, "Index is wrong");
+        information[firstClaimer].claimers[i].ek = ek;
     }
     function lookUpNoOfClaimers(address firstClaimer) public view returns (uint256){
         require(information[firstClaimer].hoster.hoster_end_timestamp > block.timestamp, 
@@ -89,5 +98,27 @@ contract UserRecord{
         require(information[firstClaimer].hoster.hoster_end_timestamp > block.timestamp, 
         "The first claimer address is not valid right now!");
         return information[firstClaimer].claimers[i].balance;
+    }
+    function lookUpBalanceByAddr(address firstClaimer, address addr) public view returns (uint256){
+        require(information[firstClaimer].hoster.hoster_end_timestamp > block.timestamp, 
+        "The first claimer address is not valid right now!");
+        for(uint128 i = 0; i < information[firstClaimer].noOfClaimers; i++) {         
+            if(information[firstClaimer].claimers[i].addr == addr){
+                return information[firstClaimer].claimers[i].balance;
+            }
+        }
+        require(false, "The address provided is invalid!");
+        return 0;
+    }
+    function lookUpEkByAddr(address firstClaimer, address addr) public view returns (uint256){
+        require(information[firstClaimer].hoster.hoster_end_timestamp > block.timestamp, 
+        "The first claimer address is not valid right now!");
+        for(uint128 i = 0; i < information[firstClaimer].noOfClaimers; i++) {         
+            if(information[firstClaimer].claimers[i].addr == addr){
+                return information[firstClaimer].claimers[i].ek;
+            }
+        }
+        require(false, "The address provided is invalid!");
+        return 0;
     }
 }
