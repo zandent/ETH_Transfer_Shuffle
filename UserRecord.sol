@@ -89,6 +89,20 @@ contract UserRecord{
         require(information[firstClaimer].claimers[i].addr == msg.sender, "Index is wrong");
         information[firstClaimer].claimers[i].ek = ek;
     }
+
+    function updateEkByAddr(address firstClaimer, uint256 ek) public {
+        require(information[firstClaimer].hoster.hoster_end_timestamp > block.timestamp, 
+        "The first claimer address is not valid right now!");
+        for(uint128 i = 0; i < information[firstClaimer].noOfClaimers; i++) {         
+            if(information[firstClaimer].claimers[i].addr == msg.sender){
+                information[firstClaimer].claimers[i].ek = ek;
+                return;
+            }
+        }
+        require(false, "The address provided is invalid!");
+        return;
+    }
+    
     function lookUpNoOfClaimers(address firstClaimer) public view returns (uint256){
         require(information[firstClaimer].hoster.hoster_end_timestamp > block.timestamp, 
         "The first claimer address is not valid right now!");
