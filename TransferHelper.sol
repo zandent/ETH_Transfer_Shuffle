@@ -11,8 +11,8 @@ contract TrasnsferHelper is UserRecord{
         address payable[] memory receivers, 
         //no need for pubkeys, address is enough
         //uint256[] memory sender_pubKeys, 
-        uint128 NoOfClaimers,
-        uint256 amount,
+        uint16 NoOfClaimers,
+        uint32 amount,
         //uint256 total_amount_to_firstClaimer,
         //signiture components
         uint8[] memory v,
@@ -32,7 +32,7 @@ contract TrasnsferHelper is UserRecord{
                 if(senders[i] == information[msg.sender].claimers[j].addr){
                     //balance verification
                     require(information[msg.sender].claimers[j].balance >= amount,"someone balance is not enough");
-                    information[msg.sender].claimers[j].balance = information[msg.sender].claimers[j].balance.sub(amount);
+                    information[msg.sender].claimers[j].balance = information[msg.sender].claimers[j].balance.sub(uint256(amount));
                     memberCheck = true;
                 }
             }
@@ -57,7 +57,7 @@ contract TrasnsferHelper is UserRecord{
         bytes32 hashmsg = keccak256(message);
         //s3: check generated address matches or not.
         for(uint128 i = 0; i < NoOfClaimers; i++) {         
-            require(hashmsg.recover(v[i],bytes32(r[i]),bytes32(s[i])) == senders[i], "signiture is invalid!");
+            require(hashmsg.recover(v[i]+27,bytes32(r[i]),bytes32(s[i])) == senders[i], "signiture is invalid!");
         }
 
         for(uint128 i = 0; i < NoOfClaimers; i++) {         

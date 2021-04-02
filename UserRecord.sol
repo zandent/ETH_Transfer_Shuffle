@@ -81,14 +81,14 @@ contract UserRecord{
         information[firstClaimer].claimers[i].balance = information[firstClaimer].claimers[i].balance.sub(amount);
         msg.sender.transfer(amount);
     }
-    function updateEk(
-        address firstClaimer,
-        uint128 i,
-        uint256 ek
-    )public {
-        require(information[firstClaimer].claimers[i].addr == msg.sender, "Index is wrong");
-        information[firstClaimer].claimers[i].ek = ek;
-    }
+    // function updateEk(
+    //     address firstClaimer,
+    //     uint128 i,
+    //     uint256 ek
+    // )public {
+    //     require(information[firstClaimer].claimers[i].addr == msg.sender, "Index is wrong");
+    //     information[firstClaimer].claimers[i].ek = ek;
+    // }
 
     function updateEkByAddr(address firstClaimer, uint256 ek) public {
         require(information[firstClaimer].hoster.hoster_end_timestamp > block.timestamp, 
@@ -103,16 +103,16 @@ contract UserRecord{
         return;
     }
     
-    function lookUpNoOfClaimers(address firstClaimer) public view returns (uint256){
-        require(information[firstClaimer].hoster.hoster_end_timestamp > block.timestamp, 
-        "The first claimer address is not valid right now!");
-        return information[firstClaimer].noOfClaimers;
-    }
-    function lookUpBalance(address firstClaimer, uint128 i) public view returns (uint256){
-        require(information[firstClaimer].hoster.hoster_end_timestamp > block.timestamp, 
-        "The first claimer address is not valid right now!");
-        return information[firstClaimer].claimers[i].balance;
-    }
+    // function lookUpNoOfClaimers(address firstClaimer) public view returns (uint256){
+    //     require(information[firstClaimer].hoster.hoster_end_timestamp > block.timestamp, 
+    //     "The first claimer address is not valid right now!");
+    //     return information[firstClaimer].noOfClaimers;
+    // }
+    // function lookUpBalance(address firstClaimer, uint128 i) public view returns (uint256){
+    //     require(information[firstClaimer].hoster.hoster_end_timestamp > block.timestamp, 
+    //     "The first claimer address is not valid right now!");
+    //     return information[firstClaimer].claimers[i].balance;
+    // }
     function lookUpBalanceByAddr(address firstClaimer, address addr) public view returns (uint256){
         require(information[firstClaimer].hoster.hoster_end_timestamp > block.timestamp, 
         "The first claimer address is not valid right now!");
